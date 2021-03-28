@@ -47,4 +47,6 @@ function weather(request, response) {
     });
     response.send(weatherArr);
 }
-app.listen(PORT, ()=> console.log(`App is running on Server on port: ${PORT}`))
+app.listen(process.env.PORT || 3000, function(){
+    console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
+  });
