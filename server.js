@@ -9,6 +9,7 @@ app.use(cors());
 app.listen(PORT, ()=> console.log(`This app is working an port ${PORT}`));
 app.get('/location', location);
 app.get('/weather', weather);
-function location() {
-    const getLocation = require('./data/location.json')
+function location(request, response) {
+    const getLocation = require('./data/location.json');
+    
 }
