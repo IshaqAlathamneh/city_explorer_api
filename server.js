@@ -34,6 +34,9 @@ function Weathers(forecast, time){
     weatherArr.push(this);
 }
 function weather(request, response) {
+    if(weatherArr){
+        weatherArr = [];
+    }
     const getData = require('./data/weather.json');
     let dataArr = getData.data;
     dataArr.forEach(element => {
@@ -45,9 +48,3 @@ function weather(request, response) {
     response.send(weatherArr);
 }
 app.listen(PORT, ()=> console.log(`App is running on Server on port: ${PORT}`))
-// let obj = {
-    //     search_query: city,
-    //     formatted_query: getLocation[0].display_name,
-    //     latitude: getLocation[0].lat,
-    //     longitude: getLocation[0].lon
-    // }
