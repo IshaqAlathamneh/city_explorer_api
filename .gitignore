@@ -2,8 +2,6 @@
 
 ### Linux ###
 *~
-### dotenv
-.env
 
 # temporary files which can be created if a process still has a handle open of a deleted file
 .fuse_hidden*
@@ -44,7 +42,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-package-lock.json
+
 ### Node ###
 # Logs
 logs
@@ -224,6 +222,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
 
 
 # End of https://www.gitignore.io/api/node,macos,linux,windows,webstorm,visualstudiocode
