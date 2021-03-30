@@ -12,7 +12,7 @@ app.use(cors()); // use cors
 
 
 
-
+app.get('/', homePage);
 app.get('/location', locationCity);
 app.get('/weather', weather);
 app.get('/parks', park);
@@ -26,6 +26,9 @@ function notFoundHandler(request, response) {
 
 function errorHandler(err, request, response, next) {
   response.status(500).send('Sorry, something went wrong');
+}
+function homePage (request, response) {
+    response.send('Hello Guys')
 }
 function Map(search_query, gotData)  {
     this.search_query = search_query;
@@ -41,7 +44,7 @@ function locationCity(request, response) {
     if (arrLocation[city]){
         response.send(arrLocation[city]);
     }else {
-    let key = process.env.geocode;
+    let key = process.env.GEOCODE_API_KEY;
     let url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`
     superagent.get(url).then( res => {
         let arrData = res.body[0];
@@ -62,7 +65,7 @@ function Weathers(forecast, time){
 }
 function weather(request, response) {
     let city = request.query.city;
-    let key = process.env.cold;
+    let key = process.env.WEATHER_API_KEY;
     let url = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&key=${key}`;
     superagent.get(url).then(res => {
 
@@ -87,16 +90,16 @@ function Parking(a,b,c,d,e){
     parkArr.push(this);
 }
 function park(request, response) {
-    let key = process.env.parking;
-    let url = `https://developer.nps.gov/api/v1/parks?api_key=${key}`;
+    let key = process.env.PARKS_API_KEY;
+    let url = `https://developer.nps.gov/api/v1/parks?api_key=${key}&limit=10`;
     superagent.get(url).then(res => {
         let info = res.body.data;
         info.forEach(element => {
             let newUrl = element.url;
             let fullName = element.fullName;
             let newDes = element.description;
-            let Fee = element.entranceFees.cost;
-            let newFee = '0.00';
+            let Fee = element.entranceFees[0].cost;
+            let newFee = Fee;
             let newAddress = element.addresses[0].line1 + ' ' + element.addresses[0].city + ' ' + element.addresses[0].stateCode + ' ' + element.addresses[0].postalCode;
             let newPark = new Parking(fullName, newAddress, newFee, newDes, newUrl);
 
