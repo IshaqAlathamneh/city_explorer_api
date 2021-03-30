@@ -6,14 +6,17 @@ const PORT = process.env.PORT; // convert this to an envirment variable
 const express = require('express'); // node.js framework.
 const superagent = require('superagent');
 const cors = require('cors'); // cross origin resources sharing
+const pg = require('pg');
 const app = express(); //initalize express app
 
+const client = new pg.Client(process.env.DATABASE_URL);
+client.on('error', err => console.log("PG PROBLEM!!!") );
 app.use(cors()); // use cors
 
 
 
 app.get('/', homePage);
-app.get('/location', locationCity);
+app.get('/location', forDataBase);
 app.get('/weather', weather);
 app.get('/parks', park);
 app.use('*', notFoundHandler); // 404 not found url
@@ -39,11 +42,33 @@ function Map(search_query, gotData)  {
 let arrLocation = {};
 let lat = '';
 let lon = '';
-function locationCity(request, response) {
+let SQL = '';
+let values = [];
+let condition = false;
+function forDataBase(request, response) {
     let city = request.query.city;
-    if (arrLocation[city]){
-        response.send(arrLocation[city]);
-    }else {
+    let SQL = 'SELECT * FROM location'
+    client.query(SQL).then(result=> {
+        console.log(result.rows);
+        // response.send(result.rows);
+        result.rows.forEach( element=> {
+            if (element.search_query == city){
+                condition = true;
+                console.log(element)
+                response.send(element);
+                lat = element.latitude;
+                lon = element.longitude;
+            }
+        })
+        if(!condition){
+            app.get('/add', locationCity);
+        }
+    });
+}
+
+function locationCity(request, response) {
+   console.log('in location function')
+    let city = request.query.city;
     let key = process.env.GEOCODE_API_KEY;
     let url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`
     superagent.get(url).then( res => {
@@ -51,12 +76,19 @@ function locationCity(request, response) {
         let newLocation = new Map(city, arrData);
         lat = arrData.lat;
         lon = arrData.lon;
-
+        SQL = 'INSERT INTO location (search_query, formatted_query, latitude, longitude) VALUES($1, $2, $3, $4) RETURNING *';
+        values = [city, newLocation.formatted_query, lat, lon];
+        client.query(SQL, values).then(result=> {
+            // console.log(result.rows);
+            // response.send(result.rows);
+        });
         response.send(newLocation);
     }).catch((err)=> {
         response.send('Maintenance... We will come back soon');
-      });}
-}
+      });
+      
+    }
+
 let weatherArr = [];
 function Weathers(forecast, time){
     this.forecast = forecast;
@@ -70,7 +102,7 @@ function weather(request, response) {
     superagent.get(url).then(res => {
 
         let dataObj = res.body;
-        console.log(dataObj)
+        // console.log(dataObj)
         dataObj.data.map(element => {
             let time = element.valid_date;
             let dis = element.weather.description;
@@ -108,4 +140,13 @@ function park(request, response) {
     })
     
 }
-app.listen(PORT, () => console.log(`App is listening on ${PORT}`));
+client.connect()
+  .then( () => {
+    app.listen(PORT, () => {
+      console.log("Connected to database:", client.connectionParameters.database) //show what database we connected to
+      console.log('Server up on', PORT);
+    });
+  })
+  .catch(err => {
+    console.log('ERROR', err);
+  });
