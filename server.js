@@ -61,14 +61,8 @@ function forDataBase(request, response) {
             }
         })
         if(!condition){
-            app.get('/add', locationCity);
-        }
-    });
-}
-
-function locationCity(request, response) {
-   console.log('in location function')
-    let city = request.query.city;
+            console.log('in location function')
+    // let city = request.query.city;
     let key = process.env.GEOCODE_API_KEY;
     let url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`
     superagent.get(url).then( res => {
@@ -86,8 +80,14 @@ function locationCity(request, response) {
     }).catch((err)=> {
         response.send('Maintenance... We will come back soon');
       });
+        }
+    });
+}
+
+// function locationCity(request, response) {
+   
       
-    }
+//     }
 
 let weatherArr = [];
 function Weathers(forecast, time){
