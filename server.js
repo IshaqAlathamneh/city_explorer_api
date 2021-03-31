@@ -19,6 +19,9 @@ app.get('/', homePage);
 app.get('/location', forDataBase);
 app.get('/weather', weather);
 app.get('/parks', park);
+app.get('/movies', movies);
+app.get('/yelp', yelp);
+
 app.use('*', notFoundHandler); // 404 not found url
  
 app.use(errorHandler);
@@ -49,19 +52,19 @@ function forDataBase(request, response) {
     let city = request.query.city;
     let SQL = 'SELECT * FROM location'
     client.query(SQL).then(result=> {
-        console.log(result.rows);
+        // console.log(result.rows);
         // response.send(result.rows);
         result.rows.forEach( element=> {
             if (element.search_query == city){
                 condition = true;
-                console.log(element)
+                // console.log(element)
                 response.send(element);
                 lat = element.latitude;
                 lon = element.longitude;
             }
         })
         if(!condition){
-            console.log('in location function')
+            // console.log('in location function')
     // let city = request.query.city;
     let key = process.env.GEOCODE_API_KEY;
     let url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`
@@ -139,6 +142,68 @@ function park(request, response) {
         response.send(parkArr);
     })
     
+}
+let movieArr = [];
+function Movie(t,o,avgv,tv,p,r,i){
+    this.title = t;
+    this.overview = o;
+    this.average_votes = avgv;
+    this.total_votes = tv;
+    this.popularity = p;
+    this.released_on = r;
+    this.image_url = i;
+    movieArr.push(this);
+}
+function movies(request, response){
+    let movie_key = process.env.MOVIE_API_KEY;
+    let url = `http://api.themoviedb.org/3/movie/top_rated?api_key=${movie_key}&query=${request.query.city}`
+    superagent.get(url).then(res => {
+        let movieData = res.body.results;
+        movieData.forEach(element => {   
+        let a = element.title;
+        let b = element.overview;
+        let c = element.vote_average;
+        let d = element.vote_count;
+        let e = element.popularity;
+        let f = element.release_date;
+        let g = 'https://image.tmdb.org/t/p/w500/' + element.poster_path;
+        let newMovie = new Movie(a,b,c,d,e,f,g);
+    });
+        
+        response.send(movieArr)
+    })
+
+}
+let yelpArr = [];
+function Yelp(){
+    this.name = n;
+    this.image_url = img;
+    this.price = p;
+    this.rating = r;
+    this.url = u;
+    yelpArr.push(this)
+}
+function yelp(request, response) {
+    let yelp_key = process.env.YELP_API_KEY;
+    let url = `https://api.yelp.com/v3/businesses/search&latitude=${lat}&longitude=${lon}`
+    superagent.get(url)
+    .set('Authorization', `Bearer ${yelp_key}`)
+    .then(res => {
+        let yelpData = res.body.businesses;
+        console.log(yelpData);
+          yelpData.forEach(element => {
+              
+              let a = element.name;
+              let b = element.image_url;
+              let c = element.price;
+              let d = element.rating;
+              let e = element.url;
+              let newYelp = new Yelp(a,b,c,d,e);
+            });
+    
+        
+        return response.json(yelpArr);
+    })
 }
 client.connect()
   .then( () => {
