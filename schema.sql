@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS location;
 CREATE TABLE IF NOT EXISTS
 location(
     id SERIAL NOT NULL,
