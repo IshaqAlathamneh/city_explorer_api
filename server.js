@@ -60,6 +60,8 @@ function forDataBase(request, response) {
         if (result.rowCount){
             console.log('heloooo', result)
             response.send(result.rows[0])
+            lat = result.rows[0].latitude;
+            lon = result.rows[0].longitude;
         }else {
             console.log('in location function')
             // let city = request.query.city;
@@ -194,7 +196,7 @@ function yelp(request, response) {
     
     console.log('booooody',request.query)
     let yelp_key = process.env.YELP_API_KEY;
-    let url = `https://api.yelp.com/v3/businesses/search?term=restaurants&location=${request.query.search_query}&limit=10`;
+    let url = `https://api.yelp.com/v3/businesses/search?term=restaurants&location=${request.query.search_query}&limit=5`;
     superagent.get(url)
     .set('Authorization', `Bearer ${yelp_key}`)
     .then(res => {
@@ -215,6 +217,11 @@ function yelp(request, response) {
         }).then((x)=> {
             // console.log(x)
             // console.log('yelp Arr ---------->',yelpArr);
+            // const page = request.query.page;
+            // const limit = request.query.limit
+            // const startIndex = (page - 1) * limit;
+            // const endIndex = (page*limit);
+            // const resul = yelpArr.slice(startIndex, endIndex);
             response.send(yelpArr);
         }).catch( error => {
             console.log('ERROR', error);
