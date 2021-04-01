@@ -192,11 +192,12 @@ function Yelp(n,img,p,r,u){
     this.url = u;
     yelpArr.push(this)
 }
+let startIndex = 0;
 function yelp(request, response) {
     
     console.log('booooody',request.query)
     let yelp_key = process.env.YELP_API_KEY;
-    let url = `https://api.yelp.com/v3/businesses/search?term=restaurants&location=${request.query.search_query}&limit=5`;
+    let url = `https://api.yelp.com/v3/businesses/search?term=restaurants&location=${request.query.search_query}&limit=25`;
     superagent.get(url)
     .set('Authorization', `Bearer ${yelp_key}`)
     .then(res => {
@@ -218,11 +219,11 @@ function yelp(request, response) {
             // console.log(x)
             // console.log('yelp Arr ---------->',yelpArr);
             // const page = request.query.page;
-            // const limit = request.query.limit
-            // const startIndex = (page - 1) * limit;
-            // const endIndex = (page*limit);
-            // const resul = yelpArr.slice(startIndex, endIndex);
-            response.send(yelpArr);
+            // const limit = request.query.limit 
+            let endIndex = startIndex + 5;
+            const resul = yelpArr.slice(startIndex, endIndex);
+            startIndex +=5;
+            response.send(resul);
         }).catch( error => {
             console.log('ERROR', error);
             response.status(500).send('So sorry, something went wrong.');
